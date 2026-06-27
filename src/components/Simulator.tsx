@@ -91,15 +91,16 @@ export function Simulator() {
 
   const gain = result ? result.finalValue - result.totalInvested : 0;
   const isGain = gain >= 0;
-  // La barre représente toujours la capital final : part "montant investi" (bleu)
-  // vs part "plus-value" (or). En cas de moins-value, la part manquante reste
-  // simplement non remplie (pas de couleur dédiée à la perte).
+  // Les deux parts de la barre sont toujours rapportées à la valeur finale :
+  // investi/valeur finale (bleu) et plus-value/valeur finale (or). En cas de
+  // moins-value, la part "or" n'a pas de sens : elle est clampée à 0 et la
+  // part bleue à 100 (le ratio investi/valeur finale dépasserait 100 %).
   const investedSharePct = result
-    ? isGain
-      ? (result.totalInvested / (result.finalValue || 1)) * 100
-      : (result.finalValue / (result.totalInvested || 1)) * 100
+    ? Math.min(100, (result.totalInvested / (result.finalValue || 1)) * 100)
     : 0;
-  const gainSharePct = result && isGain ? 100 - investedSharePct : 0;
+  const gainSharePct = result
+    ? Math.max(0, (gain / (result.finalValue || 1)) * 100)
+    : 0;
 
   return (
     <div className="w-full rounded-card border border-white/10 bg-surface/80 p-6 shadow-glow sm:p-10">
@@ -188,7 +189,7 @@ export function Simulator() {
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Date de début" htmlFor="startDate">
               <input
                 id="startDate"
@@ -278,7 +279,7 @@ export function Simulator() {
                   <p className="text-xs uppercase tracking-wide text-white/60">
                     Performance
                   </p>
-                  <p className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+                  <p className="mt-2 text-3xl font-bold text-white sm:text-4xl lg:text-3xl xl:text-4xl">
                     {result.performancePct >= 0 ? "+" : ""}
                     {result.performancePct.toFixed(2)} %
                   </p>
