@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode, type SubmitEvent } from "react";
-import { getPriceSeries } from "@/lib/dataset";
+import { getDateRange, getPriceSeries } from "@/lib/dataset";
 import { runSimulation } from "@/lib/simulation";
 import type {
   CryptoSymbol,
@@ -30,6 +30,13 @@ const fieldClassName =
 
 const labelClassName =
   "mb-1.5 block font-jakarta text-xs font-medium uppercase tracking-wide text-white/60";
+
+/** Ramène une date ISO dans une plage [min, max] (comparaison lexicographique valide en ISO 8601). */
+function clampDate(date: string, min: string, max: string): string {
+  if (date < min) return min;
+  if (date > max) return max;
+  return date;
+}
 
 function Field({
   label,
@@ -60,11 +67,27 @@ export function Simulator() {
   const [mode, setMode] = useState<InvestmentMode>("dca");
   const [frequency, setFrequency] = useState<DcaFrequency>("monthly");
   const [amount, setAmount] = useState(100);
-  const [startDate, setStartDate] = useState("2020-01-01");
-  const [endDate, setEndDate] = useState("2023-12-01");
+
+  // Plage par défaut choisie pour montrer un cycle complet (bull/bear) plutôt
+  // que la toute première date disponible ; clampée si les données changent.
+  const DEFAULT_START_DATE = "2021-01-01";
+  const initialRange = getDateRange("BTC");
+  const [startDate, setStartDate] = useState(
+    clampDate(DEFAULT_START_DATE, initialRange.min, initialRange.max)
+  );
+  const [endDate, setEndDate] = useState(initialRange.max);
 
   const [result, setResult] = useState<SimulationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const dateRange = getDateRange(crypto);
+
+  function handleCryptoChange(next: CryptoSymbol) {
+    setCrypto(next);
+    const nextRange = getDateRange(next);
+    setStartDate((prev) => clampDate(prev, nextRange.min, nextRange.max));
+    setEndDate((prev) => clampDate(prev, nextRange.min, nextRange.max));
+  }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -131,7 +154,7 @@ export function Simulator() {
             <select
               id="crypto"
               value={crypto}
-              onChange={(e) => setCrypto(e.target.value as CryptoSymbol)}
+              onChange={(e) => handleCryptoChange(e.target.value as CryptoSymbol)}
               className={fieldClassName}
             >
               {CRYPTOS.map((c) => (
@@ -195,7 +218,11 @@ export function Simulator() {
                 id="startDate"
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                min={dateRange.min}
+                max={dateRange.max}
+                onChange={(e) =>
+                  setStartDate(clampDate(e.target.value, dateRange.min, dateRange.max))
+                }
                 className={fieldClassName}
               />
             </Field>
@@ -205,11 +232,18 @@ export function Simulator() {
                 id="endDate"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                min={dateRange.min}
+                max={dateRange.max}
+                onChange={(e) =>
+                  setEndDate(clampDate(e.target.value, dateRange.min, dateRange.max))
+                }
                 className={fieldClassName}
               />
             </Field>
           </div>
+          <p className="text-xs text-white/50">
+            Données disponibles du {dateRange.min} au {dateRange.max}.
+          </p>
 
           <button
             type="submit"

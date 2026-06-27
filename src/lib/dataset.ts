@@ -7,3 +7,9 @@ const dataset = historicalPrices as Record<CryptoSymbol, PricePoint[]>;
 export function getPriceSeries(crypto: CryptoSymbol): PricePoint[] {
   return dataset[crypto];
 }
+
+/** Plage de dates réellement couverte par les données d'une crypto. */
+export function getDateRange(crypto: CryptoSymbol): { min: string; max: string } {
+  const series = getPriceSeries(crypto);
+  return { min: series[0].date, max: series[series.length - 1].date };
+}
