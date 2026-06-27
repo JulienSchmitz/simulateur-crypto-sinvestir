@@ -1,26 +1,46 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Tokens de design — calqués sur simulateurs.sinvestir.fr (voir CLAUDE.md,
+ * section "Fidélité au design"). Tailwind v4 : déclarer les couleurs dans
+ * @theme génère automatiquement les utilitaires (bg-, text-, border-, etc.)
+ */
+@theme {
+  --color-midnight: #000031;
+  --color-midnight-light: #0a1247;
+  --color-primary: #0049c6;
+  --color-accent: #1098f7;
+  --color-gold: #d4a017;
+  --color-surface: #0d1442;
+  --color-foreground: #ffffff;
+  --color-foreground-soft: #f7f9fa;
+
+  --radius-card: 1.25rem;
 }
 
+/* Polices chargées via next/font dans layout.tsx, exposées ici comme tokens. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-lexend);
+  --font-jakarta: var(--font-jakarta);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-midnight);
+  background-image: radial-gradient(
+      60% 45% at 50% -10%,
+      color-mix(in srgb, var(--color-accent) 45%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-midnight) 0%,
+      var(--color-midnight-light) 55%,
+      var(--color-midnight) 100%
+    );
+  background-attachment: fixed;
+  color: var(--color-foreground);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 40px -12px color-mix(in srgb, var(--color-accent) 55%, transparent);
 }

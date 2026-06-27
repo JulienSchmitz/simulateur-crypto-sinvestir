@@ -1,23 +1,22 @@
+import { useId } from "react";
 import type { ValuePoint } from "@/lib/types";
 
 interface SimpleLineChartProps {
   points: ValuePoint[];
-  width?: number;
   height?: number;
 }
 
 /**
  * Graphique minimal sans dépendance externe, pour visualiser l'évolution
  * de la valeur du portefeuille. Sera remplacé/habillé par un vrai composant
- * de charting une fois le design défini.
+ * de charting si besoin, mais reste suffisant pour ce périmètre.
  */
-export function SimpleLineChart({
-  points,
-  width = 600,
-  height = 200,
-}: SimpleLineChartProps) {
+export function SimpleLineChart({ points, height = 180 }: SimpleLineChartProps) {
+  const gradientId = useId();
+  const width = 600; // viewBox de référence ; le SVG s'étire ensuite en CSS
+
   if (points.length === 0) {
-    return <p>Aucune donnée à afficher.</p>;
+    return <p className="text-sm text-white/60">Aucune donnée à afficher.</p>;
   }
 
   const values = points.map((p) => p.value);
@@ -31,19 +30,31 @@ export function SimpleLineChart({
     return `${x.toFixed(2)},${y.toFixed(2)}`;
   });
 
+  const linePoints = coordinates.join(" ");
+  const areaPoints = `0,${height} ${linePoints} ${width},${height}`;
+
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
-      width={width}
-      height={height}
+      className="h-44 w-full"
+      preserveAspectRatio="none"
       role="img"
       aria-label="Évolution de la valeur du portefeuille"
     >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1098f7" stopOpacity={0.35} />
+          <stop offset="100%" stopColor="#1098f7" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <polygon points={areaPoints} fill={`url(#${gradientId})`} />
       <polyline
-        points={coordinates.join(" ")}
+        points={linePoints}
         fill="none"
-        stroke="black"
-        strokeWidth={2}
+        stroke="#1098f7"
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
       />
     </svg>
   );
