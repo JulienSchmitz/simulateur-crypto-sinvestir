@@ -136,7 +136,7 @@ export function Simulator() {
           <span className="h-px w-8 bg-white/20 sm:w-14" />
         </div>
         <p className="font-jakarta text-sm font-semibold text-accent sm:text-base">
-          Mesurez la puissance du DCA face à un investissement unique
+          Mesurez l'impact du DCA face à un investissement unique
         </p>
         <p className="max-w-2xl text-sm text-white/70">
           Comparez un placement unique (lump sum) à un investissement programmé

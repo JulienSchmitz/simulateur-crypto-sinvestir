@@ -2,7 +2,7 @@
 
 ## Contexte
 
-Test technique pour une candidature freelance chez S'investir (média/conseil en
+Test technique pour une candidature freelance chez S'investir (conseil en
 investissement). Objectif : démontrer un niveau technique et une manière de
 travailler propre. On ne cherche pas un produit fini, mais du code propre + une
 démo en ligne qui marche.
@@ -21,7 +21,9 @@ Entrées :
 - Mode d'investissement : une fois (lump sum) OU récurrent (quotidien/hebdo/mensuel) (DCA)
 - Montant
 - Date de début et date de fin
-  Sorties :
+
+Sorties :
+
 - Montant total investi
 - Valeur finale du portefeuille
 - Performance en %
@@ -34,15 +36,15 @@ Pour la démo : dataset historique STATIQUE (prix mensuels en JSON local pour
 BTC/ETH/SOL). Avantages : déterministe, rapide, zéro dépendance externe, rien ne
 casse le jour de l'évaluation.
 À documenter dans le README : en production, ces prix viendraient d'une API
-(CoinGecko) cachée dans Supabase et rafraîchie via un cron n8n.
-(Stretch goal optionnel : couche CoinGecko en revalidation Next.js avec le JSON
+(type CoinStats ou CoinGecko) cachée dans Supabase et rafraîchie via un workflow récurrent n8n (trigger cron).
+(Stretch goal optionnel : couche API via CoinStats ou CoinGecko en revalidation Next.js avec le JSON
 statique en secours.)
 
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind CSS
 - Déploiement sur Vercel
-- PAS de Supabase pour ce périmètre (simulateur = calcul sans persistance) — à
+- PAS de Supabase pour ce périmètre (simulateur = calcul sans persistance), à
   justifier dans le README ; Supabase s'intégrerait si on capturait des leads.
 
 ## Architecture & contraintes

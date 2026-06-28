@@ -1,8 +1,6 @@
-# Simulateur DCA Crypto — S'investir
+# Simulateur DCA Crypto - S'investir
 
-Simulateur de _Dollar-Cost Averaging_ (DCA) sur crypto-actifs, transposant la
-logique fonctionnelle du simulateur crypto de S'investir aux standards visuels de
-la suite [simulateurs.sinvestir.fr](https://simulateurs.sinvestir.fr).
+Simulateur de plue-value sur cryptomonnaies, adaptant la logique fonctionnelle du simulateur crypto de S'investir aux standards visuels de la suite [simulateurs.sinvestir.fr](https://simulateurs.sinvestir.fr).
 
 **Démo en ligne :** https://simulateur-crypto-sinvestir-swart.vercel.app
 
@@ -66,6 +64,7 @@ src/
   data/          # historical-prices.json (prix mensuels réels BTC/ETH/SOL)
 scripts/
   fetch-historical-prices.mjs   # récupération des prix via l'API Binance
+CLAUDE.md        # Contexte et instructions pour l'agent Claude Code
 ```
 
 ---
@@ -84,7 +83,7 @@ La démo couvre **3 crypto-actifs représentatifs** (BTC, ETH, SOL), là où le
 simulateur d'origine en propose plusieurs milliers. C'est un choix de périmètre
 assumé : l'objectif du test est de démontrer la **mécanique de calcul et son
 intégration**, pas l'exhaustivité du catalogue. Le moteur est **indépendant du
-nombre d'actifs** — passer de 3 à plusieurs milliers est une question de **source
+nombre d'actifs**. Passer de 3 à plusieurs milliers est une question de **source
 de données**, pas de logique : il suffirait de brancher une API à la place du
 fichier local, sans toucher au calcul.
 
@@ -93,55 +92,54 @@ fichier local, sans toucher au calcul.
 Les prix de BTC/ETH/SOL (`src/data/historical-prices.json`) sont des **données
 réelles** récupérées via l'API publique gratuite de **Binance** (endpoint
 `klines`, `interval=1M`, paires BTCEUR / ETHEUR / SOLEUR, aucune clé requise), par
-le script `scripts/fetch-historical-prices.mjs`. Chaque bougie mensuelle fournit un
+le script `scripts/fetch-historical-prices.mjs`. Chaque "bougie" mensuelle fournit un
 point par mois. Les données sont ensuite **figées en instantané statique** : le
 rendu reste **déterministe et sans dépendance externe** à l'exécution (la démo ne
 peut pas être cassée par une API indisponible), tout en s'appuyant sur de vrais
 cours.
 
+Pourquoi pas CoinGecko ? L'API gratuite plafonne
+l'historique à 365 jours sur le tier public, c'est trop court pour être représentatif de plusieurs
+cycles de marché.
+
 - **Dernière récupération : 2026-06-27.**
 - **Couverture réelle :** BTC et ETH du 01/2020 au 05/2026 (77 points) ; SOL du
-  05/2021 au 05/2026 (61 points — la paire SOLEUR n'existe sur Binance que depuis
+  05/2021 au 05/2026 (61 points, la paire SOLEUR n'existe sur Binance que depuis
   mai 2021). Le simulateur **borne dynamiquement ses sélecteurs de dates** sur la
   plage réelle de chaque crypto (`getDateRange`, dans `src/lib/dataset.ts`, testé
   dans `src/lib/dataset.test.ts`). La plage par défaut à l'ouverture (2021 →
-  dernier mois) est choisie pour montrer un **cycle complet bull/bear**.
+  dernier mois) est choisie pour être le plus réprésentatif possible, en considérant un **cycle complet bull/bear**.
 - **Repli automatique :** si une paire EUR est absente ou trop courte (< 6 mois),
   le script bascule sur la paire USDT équivalente et le signale (non déclenché lors
-  de la dernière récupération). _Pourquoi pas CoinGecko : son API gratuite plafonne
-  l'historique à 365 jours sur le tier public — trop court pour couvrir plusieurs
-  cycles de marché._
+  de la dernière récupération).
 - **Régénérer le dataset** (écriture atomique : tout ou rien si une crypto échoue) :
   ```bash
   npm run fetch:prices
   ```
 
 _Remarque :_ avec une granularité mensuelle, les fréquences quotidienne et
-hebdomadaire s'appuient sur le prix mensuel disponible le plus proche — suffisant
+hebdomadaire s'appuient sur le prix mensuel disponible le plus proche ce qui est suffisant
 pour illustrer la mécanique du DCA.
 
 ### En production : mise à l'échelle
 
-Le fichier figé serait remplacé par une **API mise en cache dans Supabase et
-rafraîchie via un cron n8n** (plutôt qu'un JSON régénéré à la main). Pour couvrir
+Le fichier figé serait remplacé par une **API mise en cache dans Supabase et rafraîchie via un workflow n8n déclenché par cron** (plutôt qu'un JSON régénéré à la main). Pour couvrir
 l'ensemble du catalogue (plusieurs milliers d'actifs) et alimenter des agents IA,
 un fournisseur à plus large couverture comme **CoinStats API** serait pertinent :
 catalogue très étendu, historique long, et **serveur MCP** exploitable directement
-par des agents (Claude Code, Cursor) — en cohérence avec l'approche IA de
-S'investir.
+par des agents IA (Claude Code, Cursor).
 
 ### Graphique : SVG maison, sans librairie
 
 Le graphique d'évolution est un **SVG construit à la main** (`SimpleLineChart`),
-sans dépendance de charting (Recharts, Chart.js, amCharts…). Pour une simple
-courbe de valeur, cela évite d'alourdir le bundle d'un composant pensé pour être
+sans dépendance de bibliothèques de graphiques (Recharts, Chart.js, amCharts…). Pour une simple
+courbe de valeur, cela évite d'alourdir le code envoyé au navigateur d'un composant pensé pour être
 **embarquable proprement (iframe-ready)**. Une version interactive (axes gradués,
-tooltips au survol, multi-séries) justifierait l'ajout d'une librairie légère
-comme Recharts.
+tooltips au survol, multi-séries) justifierait l'ajout d'une librairie comme Recharts.
 
 ### Pas de persistance pour ce périmètre
 
-Le simulateur est volontairement **sans état** : il calcule, il n'enregistre rien.
+Le simulateur est volontairement **stateless** : il calcule mais n'enregistre rien.
 Les fonctions de sauvegarde et de partage présentes sur la plateforme S'investir
 relèvent d'une couche **plateforme** (comptes utilisateurs) distincte du
 simulateur lui-même, et hors du périmètre de ce test. Elles nécessiteraient une
@@ -150,9 +148,7 @@ devenant alors une ligne partageable via un identifiant unique.
 
 ### Intégrabilité
 
-Le composant `<Simulator />` est **autonome, réutilisable et à faibles
-dépendances**, conçu pour pouvoir remplacer le simulateur actuel ou être affiché
-en aperçu intégré (embedding) depuis sinvestir.fr.
+Le composant `<Simulator />` est **autonome, réutilisable et avec peu de dépendances**, conçu pour pouvoir remplacer le simulateur actuel ou être affiché en aperçu intégré (embedding) depuis sinvestir.fr.
 
 ---
 
