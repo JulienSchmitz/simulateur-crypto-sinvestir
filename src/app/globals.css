@@ -6,12 +6,12 @@
  * @theme génère automatiquement les utilitaires (bg-, text-, border-, etc.)
  */
 @theme {
-  --color-midnight: #000031;
-  --color-midnight-light: #0a1247;
+  --color-midnight: #00010e;
+  --color-midnight-light: #060a1c;
   --color-primary: #0049c6;
   --color-accent: #1098f7;
   --color-gold: #d4a017;
-  --color-surface: #0d1442;
+  --color-surface: #0a0e22;
   --color-foreground: #ffffff;
   --color-foreground-soft: #f7f9fa;
 
@@ -27,9 +27,9 @@
 body {
   background-color: var(--color-midnight);
   background-image: radial-gradient(
-      60% 45% at 50% -10%,
-      color-mix(in srgb, var(--color-accent) 45%, transparent),
-      transparent 70%
+      35% 25% at 50% 0%,
+      color-mix(in srgb, var(--color-accent) 16%, transparent),
+      transparent 60%
     ),
     linear-gradient(
       180deg,
